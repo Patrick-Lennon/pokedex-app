@@ -10,6 +10,7 @@ function PokemonInfo({ name }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [unit, setUnit] = useState<'imperial' | 'metric'>('imperial');
+  const [habitat, setHabitat] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPokemon = async () => {
@@ -21,6 +22,11 @@ function PokemonInfo({ name }: Props) {
         if (!res.ok) throw new Error('Pokémon not found');
         const data = await res.json();
         setPokemon(data);
+
+        const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${name}`);
+        if (!speciesRes.ok) throw new Error('Failed to fetch species data');
+        const speciesData = await speciesRes.json();
+        setHabitat(speciesData.habitat?.name || 'unknown');
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -38,7 +44,7 @@ function PokemonInfo({ name }: Props) {
   /*height is in decimeters, weight's in hectograms. need to convert*/
   const pHeightMetric = Math.ceil(pokemon.height * 0.1 *100)/100;
   const pHeightImperial = Math.ceil(pokemon.height * 0.1 * 3.281 *100)/100;
-  const pWeightMetric = pokemon.weight * 100;
+  const pWeightMetric = pokemon.weight * 100 * .001;
   const pWeightImperial = Math.ceil(pokemon.weight * 100 * 0.00220462 *100)/100;
 
   return (
@@ -57,6 +63,8 @@ function PokemonInfo({ name }: Props) {
       <p>Height: {unit === 'imperial' ? `${pHeightImperial} ft` : `${pHeightMetric} m`}</p>
       <p>Weight: {unit === 'imperial' ? `${pWeightImperial} lbs` : `${pWeightMetric} g`}</p>
       <p>Type(s): {pokemon.types.map(t => t.type.name).join(', ')}</p>
+      <p>Abilities: {pokemon.abilities.map(a => a.ability.name).join(', ')}</p>
+      <p>Habitat: {habitat}</p>
     </div>
   );
 };

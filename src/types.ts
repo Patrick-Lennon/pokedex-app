@@ -12,4 +12,9 @@ export interface Pokemon {
       url: string;
     };
   }[];
+  abilities: {
+    ability: { name: string };
+    is_hidden: boolean;
+    slot: number;
+  }[];
 }
